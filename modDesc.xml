@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="61">
+<version>1.0.0.0</version>
+<author>Zweistein2</author>
+
+    <title>
+        <en>plumber</en>
+        <de>Plumber</de>
+    </title>
+
+    <description>
+        <en><![CDATA[plumber makes cool stuff]]></en>
+        <de><![CDATA[Plumber macht coole Dinge]]></de>
+    </description>
+
+    <multiplayer supported="true" />
+    <iconFilename>modIcon.dds</iconFilename>
+    <extraSourceFiles>
+        <sourceFile filename="Plumber.lua" />
+    </extraSourceFiles>
+</modDesc>
