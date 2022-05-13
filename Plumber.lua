@@ -25,6 +25,7 @@ function Plumber:update(dt)
             if (timeSinceLastWrite >= 3000.0 and timeSinceLastWrite <= 4000.0) then
                 writeFields()
                 writePlayers()
+                writePlaceables()
                 writeFarms()
                 writeMetadata()
                 writeMods()
@@ -167,6 +168,70 @@ function writePlayers()
             plumberWriteMessageToPipe(",\"farmId\":", g_currentMission.players[key].farmId)
             plumberWriteMessageToPipe(",\"id\":", g_currentMission.players[key].userId)
             plumberWriteMessageToPipe("}")
+            count = count + 1
+        end
+        plumberWriteMessageToPipe("]}")
+        plumberFlushPipe()
+    end
+end
+
+function writePlaceables()
+    if(g_currentMission ~= nil and g_currentMission.placeableSystem ~= nil and g_currentMission.placeableSystem.placeables ~= nil) then
+        plumberWriteMessageToPipe("{\"placeables\":[")
+        local count = 0
+        for key, value in ipairs(g_currentMission.placeableSystem.placeables) do
+            if(count == 0) then
+                plumberWriteMessageToPipe("{\"name\":\"", g_currentMission.placeableSystem.placeables[key].xmlFile.filename ,"\"")
+            else
+                plumberWriteMessageToPipe(",{\"name\":\"", g_currentMission.placeableSystem.placeables[key].xmlFile.filename ,"\"")
+            end
+            plumberWriteMessageToPipe(",\"x\":", g_currentMission.placeableSystem.placeables[key].position.x)
+            plumberWriteMessageToPipe(",\"y\":", g_currentMission.placeableSystem.placeables[key].position.y)
+            plumberWriteMessageToPipe(",\"z\":", g_currentMission.placeableSystem.placeables[key].position.z)
+            plumberWriteMessageToPipe(",\"farmId\":", g_currentMission.placeableSystem.placeables[key].ownerFarmId)
+            plumberWriteMessageToPipe(",\"id\":", g_currentMission.placeableSystem.placeables[key].id)
+            plumberWriteMessageToPipe(",\"price\":", g_currentMission.placeableSystem.placeables[key].price)
+            plumberWriteMessageToPipe(",\"age\":", g_currentMission.placeableSystem.placeables[key].age)
+            plumberWriteMessageToPipe(",\"storage\":[")
+            if(g_currentMission.placeableSystem.placeables[key].spec_silo ~= nil and g_currentMission.placeableSystem.placeables[key].spec_silo.storages ~= nil) then
+                for storagekey, storagevalue in ipairs(g_currentMission.placeableSystem.placeables[key].spec_silo.storages) do
+                    if(storagekey == 1) then
+                        plumberWriteMessageToPipe("{\"capacity\":", g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].capacity)
+                    else
+                        plumberWriteMessageToPipe(",{\"capacity\":", g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].capacity)
+                    end
+                    plumberWriteMessageToPipe(",\"costsPerFillLevelAndDay\":", g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].costsPerFillLevelAndDay)
+                    plumberWriteMessageToPipe(",\"fillLevels\":[")
+                    if(g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].fillLevels ~= nil) then
+                        local fillcount = 0
+                        for fillkey, fillvalue in pairs(g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].fillLevels) do
+                            if(fillcount == 0) then
+                                plumberWriteMessageToPipe("{\"fillType\":", fillkey)
+                            else
+                                plumberWriteMessageToPipe(",{\"fillType\":", fillkey)
+                            end
+                            plumberWriteMessageToPipe(",\"fillLevel\":", g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].fillLevels[fillkey])
+                            plumberWriteMessageToPipe("}")
+                            fillcount = fillcount + 1
+                        end
+                    end
+                    plumberWriteMessageToPipe("]}")
+                end
+            end
+            plumberWriteMessageToPipe("]}")
+            if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.id ~= nil) then
+                plumberWriteMessageToPipe(",\"sellPointId\":", g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.id)
+            end
+            if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid ~= nil) then
+                plumberWriteMessageToPipe(",\"totalPaid\":[")
+                plumberWriteTableToPipe(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid)
+                plumberWriteMessageToPipe("]")
+            end
+            if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived ~= nil) then
+                plumberWriteMessageToPipe(",\"totalReceived\":[")
+                plumberWriteTableToPipe(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived)
+                plumberWriteMessageToPipe("]")
+            end
             count = count + 1
         end
         plumberWriteMessageToPipe("]}")
@@ -367,6 +432,10 @@ function writeMissions()
                 plumberWriteMessageToPipe(",\"sellPointPlaceableId\":", g_missionManager.missions[key].sellPoint.owningPlaceable.currentSavegameId)
             elseif(g_missionManager.missions[key].sellingStation ~= nil and g_missionManager.missions[key].sellingStation.owningPlaceable ~= nil and g_missionManager.missions[key].sellingStation.owningPlaceable.currentSavegameId ~= nil) then
                 plumberWriteMessageToPipe(",\"sellPointPlaceableId\":", g_missionManager.missions[key].sellingStation.owningPlaceable.currentSavegameId)
+            elseif(g_missionManager.missions[key].sellPoint ~= nil and g_missionManager.missions[key].sellPoint.owningPlaceable ~= nil and g_missionManager.missions[key].sellPoint.owningPlaceable.id ~= nil) then
+                plumberWriteMessageToPipe(",\"sellPointPlaceableId\":", g_missionManager.missions[key].sellPoint.owningPlaceable.id)
+            elseif(g_missionManager.missions[key].sellingStation ~= nil and g_missionManager.missions[key].sellingStation.owningPlaceable ~= nil and g_missionManager.missions[key].sellingStation.owningPlaceable.id ~= nil) then
+                plumberWriteMessageToPipe(",\"sellPointPlaceableId\":", g_missionManager.missions[key].sellingStation.owningPlaceable.id)
             end
             if(g_missionManager.missions[key].rewardPerHa ~= nil) then
                 plumberWriteMessageToPipe(",\"rewardPerHa\":", g_missionManager.missions[key].rewardPerHa)
