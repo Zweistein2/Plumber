@@ -192,8 +192,8 @@ function writePlaceables()
             plumberWriteMessageToPipe(",\"id\":", g_currentMission.placeableSystem.placeables[key].id)
             plumberWriteMessageToPipe(",\"price\":", g_currentMission.placeableSystem.placeables[key].price)
             plumberWriteMessageToPipe(",\"age\":", g_currentMission.placeableSystem.placeables[key].age)
-            plumberWriteMessageToPipe(",\"storage\":[")
             if(g_currentMission.placeableSystem.placeables[key].spec_silo ~= nil and g_currentMission.placeableSystem.placeables[key].spec_silo.storages ~= nil) then
+                plumberWriteMessageToPipe(",\"storage\":[")
                 for storagekey, storagevalue in ipairs(g_currentMission.placeableSystem.placeables[key].spec_silo.storages) do
                     if(storagekey == 1) then
                         plumberWriteMessageToPipe("{\"capacity\":", g_currentMission.placeableSystem.placeables[key].spec_silo.storages[storagekey].capacity)
@@ -217,21 +217,42 @@ function writePlaceables()
                     end
                     plumberWriteMessageToPipe("]}")
                 end
+                plumberWriteMessageToPipe("]")
             end
-            plumberWriteMessageToPipe("]}")
             if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.id ~= nil) then
                 plumberWriteMessageToPipe(",\"sellPointId\":", g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.id)
             end
             if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid ~= nil) then
                 plumberWriteMessageToPipe(",\"totalPaid\":[")
-                plumberWriteTableToPipe(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid)
+                local fillcount = 0
+                for fillkey, fillvalue in pairs(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid) do
+                    if(fillcount == 0) then
+                        plumberWriteMessageToPipe("{\"fillType\":", fillkey)
+                    else
+                        plumberWriteMessageToPipe(",{\"fillType\":", fillkey)
+                    end
+                    plumberWriteMessageToPipe(",\"amount\":", g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalPaid[fillkey])
+                    plumberWriteMessageToPipe("}")
+                    fillcount = fillcount + 1
+                end
                 plumberWriteMessageToPipe("]")
             end
             if(g_currentMission.placeableSystem.placeables[key].spec_sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation ~= nil and g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived ~= nil) then
                 plumberWriteMessageToPipe(",\"totalReceived\":[")
-                plumberWriteTableToPipe(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived)
+                local fillcount = 0
+                for fillkey, fillvalue in pairs(g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived) do
+                    if(fillcount == 0) then
+                        plumberWriteMessageToPipe("{\"fillType\":", fillkey)
+                    else
+                        plumberWriteMessageToPipe(",{\"fillType\":", fillkey)
+                    end
+                    plumberWriteMessageToPipe(",\"amount\":", g_currentMission.placeableSystem.placeables[key].spec_sellingStation.sellingStation.totalReceived[fillkey])
+                    plumberWriteMessageToPipe("}")
+                    fillcount = fillcount + 1
+                end
                 plumberWriteMessageToPipe("]")
             end
+            plumberWriteMessageToPipe("}")
             count = count + 1
         end
         plumberWriteMessageToPipe("]}")
@@ -561,20 +582,24 @@ function writeVehicles()
             plumberWriteMessageToPipe(",\"z\":", z)
             if(g_currentMission.vehicles[key].spec_fillUnit ~= nil) then
                 plumberWriteMessageToPipe(",\"fillUnits\":[")
+                local fillCounter = 0;
                 for fillkey, fillvalue in ipairs(g_currentMission.vehicles[key].spec_fillUnit.fillUnits) do
-                    if(fillkey == 1) then
-                        plumberWriteMessageToPipe("{\"fillType\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillType)
-                    else
-                        plumberWriteMessageToPipe(",{\"fillType\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillType)
+                    if(g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillType ~= 1) then
+                        if(fillCounter == 0) then
+                            plumberWriteMessageToPipe("{\"fillType\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillType)
+                        else
+                            plumberWriteMessageToPipe(",{\"fillType\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillType)
+                        end
+                        plumberWriteMessageToPipe(",\"fillLevel\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillLevel)
+                        plumberWriteMessageToPipe(",\"capacity\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].capacity)
+                        if(g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].unitText ~= nil) then
+                            plumberWriteMessageToPipe(",\"unitText\":\"", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].unitText, "\"")
+                        else
+                            plumberWriteMessageToPipe(",\"unitText\":\"l\"")
+                        end
+                        plumberWriteMessageToPipe("}")
+                        fillCounter = fillCounter + 1;
                     end
-                    plumberWriteMessageToPipe(",\"fillLevel\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].fillLevel)
-                    plumberWriteMessageToPipe(",\"capacity\":", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].capacity)
-                    if(g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].unitText ~= nil) then
-                        plumberWriteMessageToPipe(",\"unitText\":\"", g_currentMission.vehicles[key].spec_fillUnit.fillUnits[fillkey].unitText, "\"")
-                    else
-                        plumberWriteMessageToPipe(",\"unitText\":\"l\"")
-                    end
-                    plumberWriteMessageToPipe("}")
                 end
                 plumberWriteMessageToPipe("]")
             end
