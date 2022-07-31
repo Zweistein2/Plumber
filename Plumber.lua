@@ -373,7 +373,7 @@ function writeMods()
                         else
                             plumberWriteMessageToPipe(",{\"modID\":", g_modManager.nameToMod[key].id)
                         end
-                        plumberWriteMessageToPipe(",\"author\":\"", g_modManager.nameToMod[key].author, "\"")
+                        plumberWriteMessageToPipe(",\"author\":\"", string.gsub(g_modManager.nameToMod[key].author, "\"", "\\\""), "\"")
                         --plumberWriteMessageToPipe(",\"Description\":\"", g_modManager.mods[key].description, "\"")
                         plumberWriteMessageToPipe(",\"modName\":\"", g_modManager.nameToMod[key].modName, "\"")
                         plumberWriteMessageToPipe(",\"title\":\"", g_modManager.nameToMod[key].title, "\"")
@@ -580,7 +580,7 @@ function writeVehicles()
             plumberWriteMessageToPipe(",\"x\":", x)
             plumberWriteMessageToPipe(",\"y\":", y)
             plumberWriteMessageToPipe(",\"z\":", z)
-            if(g_currentMission.vehicles[key].spec_fillUnit ~= nil) then
+            if(g_currentMission.vehicles[key].spec_fillUnit ~= nil and g_currentMission.vehicles[key].spec_fillUnit.fillUnits ~= nil) then
                 plumberWriteMessageToPipe(",\"fillUnits\":[")
                 local fillCounter = 0;
                 for fillkey, fillvalue in ipairs(g_currentMission.vehicles[key].spec_fillUnit.fillUnits) do
